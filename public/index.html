@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KCSE Examination Results Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background-color: #004225;
+            color: white;
+            text-align: center;
+        }
+
+        .banner-img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .header-content {
+            padding: 20px 15px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .logo i {
+            color: #ffcc00;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+        
+        .header p {
+            font-size: 15px;
+            opacity: 0.9;
+        }
+        
+        .input-section {
+            padding: 25px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .input-group {
+            margin-bottom: 18px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            border-color: #004225;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 66, 37, 0.1);
+        }
+        
+        .button-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            background-color: #004225;
+            color: white;
+            border: none;
+            padding: 16px 35px;
+            font-size: 17px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 250px;
+        }
+        
+        .btn:hover {
+            background-color: #003018;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .results-section {
+            padding: 25px 20px;
+            display: none;
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .results-header h2 {
+            color: #004225;
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+        
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f0f8ff;
+            padding: 18px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .info-item {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            color: #333;
+            word-break: break-word;
+        }
+        
+        .mean-grade {
+            background-color: #004225;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        .grades-table-container {
+            overflow-x: auto;
+            margin: 20px 0 30px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .grades-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+        
+        .grades-table th {
+            background-color: #004225;
+            color: white;
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .grades-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        
+        .grades-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .grades-table tr:hover {
+            background-color: #f0f8ff;
+        }
+        
+        .grade-badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 70px;
+            font-size: 13px;
+        }
+        
+        .grade-a { background-color: #d4edda; color: #155724; }
+        .grade-b { background-color: #fff3cd; color: #856404; }
+        .grade-c { background-color: #cce5ff; color: #004085; }
+        .grade-d { background-color: #f8d7da; color: #721c24; }
+        
+        .footer {
+            text-align: center;
+            padding: 18px;
+            color: #666;
+            font-size: 13px;
+            border-top: 1px solid #eee;
+            background-color: #f8f9fa;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content { padding: 15px; }
+            .header h1 { font-size: 18px; }
+            .logo { font-size: 16px; }
+            .student-info { flex-direction: column; gap: 12px; }
+            .grades-table th, .grades-table td { padding: 12px 8px; font-size: 13px; }
+            .grade-badge { min-width: 60px; font-size: 12px; }
+            .btn { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <!-- Banner Image from the same folder -->
+            <img src="Banner.png" alt="KNEC Official Banner" class="banner-img">
+
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>KNEC</span>
+                </div>
+                <h1>KENYA NATIONAL EXAMINATIONS COUNCIL</h1>
+                <p>2025 KCSE Examination Provisional Results</p>
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="index-number">Type index number here...</label>
+                <input type="text" id="index-number" placeholder="Enter your index number">
+            </div>
+            
+            <div class="input-group">
+                <label for="registered-name">Type your registered name here...</label>
+                <input type="text" id="registered-name" placeholder="Enter your registered name">
+            </div>
+            
+            <div class="button-container">
+                <button class="btn" id="view-results-btn">
+                    <i class="fas fa-eye"></i> View Results
+                </button>
+            </div>
+        </div>
+        
+        <div class="results-section" id="results-section">
+            <div class="results-header">
+                <h2>2025 KCSE Examination Provisional Results</h2>
+                <p>Results for the candidate below</p>
+            </div>
+            
+            <div class="student-info">
+                <div class="info-item">
+                    <span class="info-label">Index Number:</span>
+                    <span class="info-value" id="display-index"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value" id="display-name"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">School:</span>
+                    <span class="info-value" id="display-school"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Mean Grade:</span>
+                    <div class="mean-grade" id="display-mean-grade"></div>
+                </div>
+            </div>
+            
+            <div class="grades-table-container">
+                <table class="grades-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>CODE</th>
+                            <th>SUBJECT NAME</th>
+                            <th>GRADE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grades-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 The Kenya National Examinations Council. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        const indexNumberInput = document.getElementById('index-number');
+        const registeredNameInput = document.getElementById('registered-name');
+        const viewResultsBtn = document.getElementById('view-results-btn');
+        const resultsSection = document.getElementById('results-section');
+        const gradesTableBody = document.getElementById('grades-table-body');
+        const displayIndex = document.getElementById('display-index');
+        const displayName = document.getElementById('display-name');
+        const displaySchool = document.getElementById('display-school');
+        const displayMeanGrade = document.getElementById('display-mean-grade');
+    
+        function getGradeClass(grade) {
+            if (grade.includes('A')) return 'grade-a';
+            if (grade.includes('B')) return 'grade-b';
+            if (grade.includes('C')) return 'grade-c';
+            if (grade.includes('D')) return 'grade-d';
+            return 'grade-b';
+        }
+    
+        function populateGradesTable(grades) {
+            gradesTableBody.innerHTML = '';
+            grades.forEach((subject, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${subject.code}</td>
+                    <td>${subject.name}</td>
+                    <td><span class="grade-badge ${getGradeClass(subject.grade)}">${subject.grade}</span></td>
+                `;
+                gradesTableBody.appendChild(row);
+            });
+        }
+    
+        async function displayResults() {
+            const indexNumber = indexNumberInput.value.trim();
+            const nameInput = registeredNameInput.value.trim();
+    
+            if (!indexNumber || !nameInput) {
+                alert('Please enter both index number and registered name');
+                return;
+            }
+    
+            try {
+                const response = await fetch('/api/results', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ index_number: indexNumber, name: nameInput })
+                });
+    
+                const data = await response.json();
+    
+                if (!response.ok) {
+                    alert(data.error || 'Results not found');
+                    return;
+                }
+    
+                displayIndex.textContent = data.index_number;
+                displayName.textContent = nameInput.toUpperCase();
+                displaySchool.textContent = data.school;
+                displayMeanGrade.textContent = data.mean_grade;
+    
+                populateGradesTable(data.grades);
+                resultsSection.style.display = 'block';
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            } catch (err) {
+                alert('Error connecting to server. Make sure the backend is running.');
+            }
+        }
+    
+        viewResultsBtn.addEventListener('click', displayResults);
+    
+        indexNumberInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') registeredNameInput.focus();
+        });
+    
+        registeredNameInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') displayResults();
+        });
+    </script>
+</body>
+</html>

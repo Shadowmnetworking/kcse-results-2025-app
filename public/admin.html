@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - KCSE Results</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f7fa; padding: 20px; }
+    .container { max-width: 1200px; margin: auto; background: white; border-radius: 12px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    h1 { color: #004225; text-align: center; margin-bottom: 30px; }
+    .form-section { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+    input, textarea, button, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+    button { background: #004225; color: white; cursor: pointer; font-weight: bold; }
+    button:hover { background: #003018; }
+    button.delete { background: #721c24; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #004225; color: white; }
+    tr:hover { background: #f0f8ff; }
+    .actions { display: flex; gap: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Hidden Admin Panel - KCSE Results Management</h1>
+
+    <div class="form-section">
+      <h2>Add / Edit Student</h2>
+      <input id="index" placeholder="Index Number (e.g. 30544201089)" />
+      <input id="name" placeholder="Full Name" />
+      <input id="school" placeholder="School Name" />
+      <input id="mean" placeholder="Mean Grade (e.g. B+ (PLUS))" />
+      <textarea id="grades" rows="8" placeholder='[{"code":"121","name":"MATHEMATICS","grade":"A"}, {"code":"102","name":"KISWAHILI","grade":"B+ (PLUS)"}]'></textarea>
+      <button onclick="saveStudent()">Save Student</button>
+    </div>
+
+    <h2>All Students</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Index Number</th>
+          <th>Name</th>
+          <th>School</th>
+          <th>Mean Grade</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function loadStudents() {
+      const res = await fetch('/api/admin/students');
+      const students = await res.json();
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+      students.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${s.index_number}</td>
+          <td>${s.name}</td>
+          <td>${s.school}</td>
+          <td>${s.mean_grade}</td>
+          <td class="actions">
+            <button onclick="editStudent('${s.index_number}')">Edit</button>
+            <button class="delete" onclick="deleteStudent('${s.index_number}')">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function editStudent(index) {
+      const res = await fetch(`/api/admin/student/${index}`);
+      const student = await res.json();
+      document.getElementById('index').value = student.index_number;
+      document.getElementById('name').value = student.name;
+      document.getElementById('school').value = student.school;
+      document.getElementById('mean').value = student.mean_grade;
+      document.getElementById('grades').value = JSON.stringify(student.grades, null, 2);
+    }
+
+    async function saveStudent() {
+      const index = document.getElementById('index').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const school = document.getElementById('school').value.trim();
+      const mean = document.getElementById('mean').value.trim();
+      const gradesText = document.getElementById('grades').value.trim();
+
+      if (!index || !name || !gradesText) return alert('Fill required fields');
+
+      let grades;
+      try { grades = JSON.parse(gradesText); } 
+      catch { return alert('Invalid JSON in grades field'); }
+
+      const res = await fetch('/api/admin/student', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ index_number: index, name, school, mean_grade: mean, grades })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert('Student saved successfully!');
+        loadStudents();
+        // Clear form
+        document.getElementById('index').value = '';
+        document.getElementById('name').value = '';
+        document.getElementById('school').value = '';
+        document.getElementById('mean').value = '';
+        document.getElementById('grades').value = '';
+      } else {
+        alert('Error: ' + (data.error || 'Unknown'));
+      }
+    }
+
+    async function deleteStudent(index) {
+      if (!confirm(`Delete student with index ${index}?`)) return;
+      const res = await fetch(`/api/admin/student/${index}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        alert('Deleted!');
+        loadStudents();
+      }
+    }
+
+    loadStudents(); // Load on page open
+  </script>
+</body>
+</html>
